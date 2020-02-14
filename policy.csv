@@ -1,0 +1,3 @@
+p,owner,/*,(GET)|(POST)|(PUT)|(DELETE)|(PATCH)
+p,admin,/*,(GET)|(POST)|(PUT)|(DELETE)|(PATCH)
+p,guest,/*,GET
