@@ -27,12 +27,12 @@ func (u *Users) Exists(id string) bool {
 	userRow := u.db.QueryRow("SELECT * FROM User WHERE ID=?", id)
 
 	err := userRow.Scan(&user.ID, &user.Username, &user.Password, &user.Role)
+
 	if err != nil {
 		return false
 	}
 
 	if user.ID == id {
-		log.Println("exist")
 		return true
 	}
 

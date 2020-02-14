@@ -1,4 +1,4 @@
-p,owner,/*,*
-p,admin,/*,*
-p,guest,/*,GET
-p,guest,/login,POST
+p, owner, /*, (GET)|(POST)|(PUT)|(DELETE)
+p, admin, /*, (GET)|(POST)|(PUT)|(DELETE)
+p, guest, /*, GET
+p, guest, /login, POST
