@@ -15,7 +15,6 @@ func Authorizer(e *casbin.Enforcer, users *Users) func(next http.Handler) http.H
 				role = "guest"
 			} else if len(role) > 0 {
 				uid := sessionManager.GetString(r.Context(), "userID")
-				//uid := "1"
 				exists := users.Exists(uid)
 				if !exists {
 					w.WriteHeader(http.StatusForbidden)
