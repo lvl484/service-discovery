@@ -40,3 +40,25 @@ func Authorizer(e *casbin.Enforcer, users *Users) func(next http.Handler) http.H
 		return http.HandlerFunc(fn)
 	}
 }
+
+func loginHandler(users *Users) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		name := r.PostFormValue("username")
+		pass := r.PostFormValue("password")
+		user, err := users.FindByCredentials(name, pass)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("WRONG_CREDENTIALS"))
+			return
+		}
+		// setup session
+		if err := sessionManager.RenewToken(r.Context()); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("RENEWTOKEN_ERR"))
+			return
+		}
+		sessionManager.Put(r.Context(), "id", user.ID)
+		sessionManager.Put(r.Context(), "role", user.Role)
+		w.Write([]byte("SUCCESS"))
+	})
+}

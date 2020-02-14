@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -24,7 +25,6 @@ func (u *Users) Exists(id string) bool {
 	var user User
 
 	userRow := u.db.QueryRow("SELECT * FROM User WHERE ID=?", id)
-	//userRow := u.db.QueryRow("SELECT * FROM User LIMIT 1")
 
 	err := userRow.Scan(&user.ID, &user.Username, &user.Password, &user.Role)
 	if err != nil {
@@ -39,10 +39,18 @@ func (u *Users) Exists(id string) bool {
 	return false
 }
 
-//func FindByCredentials(name string) (User, error) {
-//
-//	return User{}, errors.New("USER_NOT_FOUND")
-//}
+func (u *Users) FindByCredentials(name, pass string) (User, error) {
+	var user User
+
+	userRow := u.db.QueryRow("SELECT * FROM User WHERE Username=? and Password=?", name, pass)
+	err := userRow.Scan(&user.ID, &user.Username, &user.Password, &user.Role)
+
+	if err != nil {
+		return User{}, errors.New("USER_NOT_FOUND")
+	}
+
+	return user, nil
+}
 
 func newUsers() *Users {
 	s := fmt.Sprintf("%v:%v@/%v", os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASS"), os.Getenv("MYSQL_DB"))
