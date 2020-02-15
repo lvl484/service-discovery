@@ -16,7 +16,7 @@ type somedata struct {
 }
 
 type Data struct {
-	sync.Mutex
+	*sync.Mutex
 	alldata map[string]somedata
 }
 
