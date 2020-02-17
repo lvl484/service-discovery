@@ -2,12 +2,17 @@ package main
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+)
+
+const (
+	MysqlUser = "MYSQL_USER"
+	MysqlPass = "MYSQL_PASS"
+	MysqlDb   = "MYSQL_DB"
 )
 
 type User struct {
@@ -21,39 +26,35 @@ type Users struct {
 	db *sql.DB
 }
 
-func (u *Users) Exists(id string) bool {
+func (u *Users) Exists(id string) (bool, error) {
 	var user User
 
-	userRow := u.db.QueryRow("SELECT * FROM User WHERE ID=?", id)
+	userRow := u.db.QueryRow("SELECT ID FROM User WHERE ID=?", id)
 
-	err := userRow.Scan(&user.ID, &user.Username, &user.Password, &user.Role)
+	err := userRow.Scan(&user.ID)
 
 	if err != nil {
-		return false
+		return false, err
 	}
 
-	if user.ID == id {
-		return true
-	}
-
-	return false
+	return true, nil
 }
 
-func (u *Users) FindByCredentials(name, pass string) (User, error) {
+func (u *Users) FindByCredentials(name, pass string) (*User, error) {
 	var user User
 
-	userRow := u.db.QueryRow("SELECT * FROM User WHERE Username=? and Password=?", name, pass)
-	err := userRow.Scan(&user.ID, &user.Username, &user.Password, &user.Role)
+	userRow := u.db.QueryRow("SELECT ID, ROLE FROM User WHERE Username=? and Password=?", name, pass)
+	err := userRow.Scan(&user.ID, &user.Role)
 
 	if err != nil {
-		return User{}, errors.New("USER_NOT_FOUND")
+		return &User{}, err
 	}
 
-	return user, nil
+	return &user, nil
 }
 
 func newUsers() *Users {
-	s := fmt.Sprintf("%v:%v@/%v", os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASS"), os.Getenv("MYSQL_DB"))
+	s := fmt.Sprintf("%v:%v@/%v", os.Getenv(MysqlUser), os.Getenv(MysqlPass), os.Getenv(MysqlDb))
 	database, err := sql.Open("mysql", s)
 
 	if err != nil {
