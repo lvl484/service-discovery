@@ -49,6 +49,9 @@ func (d *Data) Add(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c.Author = sessionManager.GetString(r.Context(), Username)
+	c.DateCreated = time.Now()
+
 	id := uuid.New().String()
 
 	d.configs.add(id, c)

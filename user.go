@@ -7,12 +7,13 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/lvl484/service-discovery/encodepass"
 )
 
 const (
 	MysqlUser = "MYSQL_USER"
 	MysqlPass = "MYSQL_PASS"
-	MysqlDb   = "MYSQL_DB"
+	MysqlDB   = "MYSQL_DB"
 )
 
 type User struct {
@@ -23,18 +24,28 @@ type User struct {
 }
 
 type Users struct {
-	db *sql.DB
+	conf *encodepass.PasswordConfig
+	db   *sql.DB
 }
 
-func (u *Users) Exists(id string) (bool, error) {
+func (u *Users) Exists(id, pass string) (bool, error) {
 	var user User
 
-	userRow := u.db.QueryRow("SELECT ID FROM User WHERE ID=?", id)
+	passRow := u.db.QueryRow("SELECT Password FROM User WHERE ID=?", id)
+	err := passRow.Scan(&user.Password)
 
-	err := userRow.Scan(&user.ID)
+	if err == sql.ErrNoRows {
+		return false, nil
+	}
 
 	if err != nil {
 		return false, err
+	}
+
+	res := encodepass.CompareEncodedPassword(pass, user.Password)
+
+	if !res {
+		return false, nil
 	}
 
 	return true, nil
@@ -43,25 +54,42 @@ func (u *Users) Exists(id string) (bool, error) {
 func (u *Users) FindByCredentials(name, pass string) (*User, error) {
 	var user User
 
-	userRow := u.db.QueryRow("SELECT ID, ROLE FROM User WHERE Username=? and Password=?", name, pass)
-	err := userRow.Scan(&user.ID, &user.Role)
+	userRow := u.db.QueryRow("SELECT * FROM User WHERE Username=?", name)
+	err := userRow.Scan(&user.ID, &user.Username, &user.Password, &user.Role)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
 
 	if err != nil {
-		return &User{}, err
+		return nil, err
+	}
+
+	res, err := encodepass.ComparePassword(pass, user.Password)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !res {
+		return nil, nil
 	}
 
 	return &user, nil
 }
 
 func newUsers() *Users {
-	s := fmt.Sprintf("%v:%v@/%v", os.Getenv(MysqlUser), os.Getenv(MysqlPass), os.Getenv(MysqlDb))
+	s := fmt.Sprintf("%v:%v@/%v", os.Getenv(MysqlUser), os.Getenv(MysqlPass), os.Getenv(MysqlDB))
 	database, err := sql.Open("mysql", s)
 
 	if err != nil {
 		log.Println(err)
 	}
 
+	conf := encodepass.NewPasswordConfig()
+
 	return &Users{
-		db: database,
+		db:   database,
+		conf: conf,
 	}
 }

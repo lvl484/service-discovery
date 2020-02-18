@@ -14,6 +14,7 @@ func newRouter(data *Data, users *Users) *mux.Router {
 	mainRouter.HandleFunc("/list/{ID}", data.Update).Methods(http.MethodPut)
 	mainRouter.HandleFunc("/list/{ID}", data.Delete).Methods(http.MethodDelete)
 	mainRouter.HandleFunc("/login", loginHandler(users))
+	//	mainRouter.HandleFunc("/join", joinHandler(users))
 
 	return mainRouter
 }
