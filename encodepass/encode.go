@@ -5,6 +5,7 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"strings"
 
 	"golang.org/x/crypto/argon2"
@@ -27,6 +28,7 @@ func EncodePassword(c *PasswordConfig, pass string) (string, error) {
 	passByte := []byte(pass)
 
 	hash := argon2.IDKey(passByte, salt, c.time, c.memory, c.threads, c.keyLen)
+	log.Println(hash)
 	b64Salt := base64.RawStdEncoding.EncodeToString(salt)
 	b64Hash := base64.RawStdEncoding.EncodeToString(hash)
 
@@ -62,6 +64,11 @@ func ComparePassword(password, hash string) (bool, error) {
 	comparisonHash := argon2.IDKey([]byte(password), salt, c.time, c.memory, c.threads, c.keyLen)
 
 	return (subtle.ConstantTimeCompare(decodedHash, comparisonHash) == 1), nil
+}
+
+// CompareEncodePassword returns true if password matches
+func CompareEncodedPassword(pass1, pass2 string) bool {
+	return (pass1 == pass2)
 }
 
 type PasswordConfig struct {
