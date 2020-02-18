@@ -10,6 +10,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	muxVarsID = "ID"
+)
+
 type config struct {
 	Name        string    `json:"Name"`
 	Author      string    `json:"Author"`
@@ -55,7 +59,7 @@ func (d *Data) Add(w http.ResponseWriter, r *http.Request) {
 // Get config by ID
 func (d *Data) Get(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	c := d.configs.get(params["ID"])
+	c := d.configs.get(params[muxVarsID])
 	err := json.NewEncoder(w).Encode(c)
 
 	if err != nil {
@@ -86,13 +90,13 @@ func (d *Data) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	d.configs.set(params["ID"], c)
+	d.configs.set(params[muxVarsID], c)
 }
 
 // Delete config by ID
 func (d *Data) Delete(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	d.configs.delete(params["ID"])
+	d.configs.delete(params[muxVarsID])
 	w.WriteHeader(http.StatusNoContent)
 }
 
