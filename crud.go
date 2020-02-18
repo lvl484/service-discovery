@@ -99,7 +99,10 @@ func (d *Data) Delete(w http.ResponseWriter, r *http.Request) {
 func (c *Configs) set(id string, conf config) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.all[id] = conf
+
+	if _, ok := c.all[id]; ok {
+		c.all[id] = conf
+	}
 }
 
 func (c *Configs) get(id string) config {
