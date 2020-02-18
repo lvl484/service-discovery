@@ -4,17 +4,17 @@ import (
 	"encoding/json"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
 type config struct {
-	ID             int    `json:"ID"`
-	IP             string `json:"IP"`
-	Port           bool   `json:"Port"`
-	MaxConnections int    `json:"MaxConnections"`
-	OtherSettings  string `json:"OtherSettings"`
+	Name        string    `json:"Name"`
+	Author      string    `json:"Author"`
+	DateCreated time.Time `json:"DateCreated"`
+	ConfigData  []byte    `json:"ConfigData"`
 }
 
 type configs struct {
