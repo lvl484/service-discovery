@@ -47,7 +47,7 @@ func (d *Data) Add(w http.ResponseWriter, r *http.Request) {
 
 	id := uuid.New().String()
 
-	d.Configs.set(id, c)
+	d.Configs.add(id, c)
 
 	w.WriteHeader(http.StatusCreated)
 }
@@ -103,6 +103,17 @@ func (c *Configs) set(id string, conf config) {
 	if _, ok := c.all[id]; ok {
 		c.all[id] = conf
 	}
+}
+
+func (c *Configs) add(id string, conf config) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if _, ok := c.all[id]; ok {
+		return
+	}
+
+	c.all[id] = conf
 }
 
 func (c *Configs) get(id string) config {
