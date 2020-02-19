@@ -15,6 +15,7 @@ const (
 	Password            = "password"
 	DefaultRole         = "guest"
 	DefaultRegisterRole = "user"
+	EmptyRole           = ""
 
 	ErrWrongCredentials = "WRONG_CREDENTIALS"
 	ErrRenewToken       = "RENEW_TOKEN_ERR"
@@ -27,7 +28,7 @@ func Authorizer(e *casbin.Enforcer) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			role := sessionManager.GetString(r.Context(), UserRole)
-			if role == "" {
+			if role == EmptyRole {
 				role = DefaultRole
 			}
 
