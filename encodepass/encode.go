@@ -5,7 +5,6 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
-	"log"
 	"strings"
 
 	"golang.org/x/crypto/argon2"
@@ -28,7 +27,6 @@ func EncodePassword(c *PasswordConfig, pass string) (string, error) {
 	passByte := []byte(pass)
 
 	hash := argon2.IDKey(passByte, salt, c.time, c.memory, c.threads, c.keyLen)
-	log.Println(hash)
 	b64Salt := base64.RawStdEncoding.EncodeToString(salt)
 	b64Hash := base64.RawStdEncoding.EncodeToString(hash)
 
