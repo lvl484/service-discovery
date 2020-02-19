@@ -10,7 +10,7 @@ import (
 	"github.com/casbin/casbin"
 )
 
-const IdleTimeout = 10 * time.Minute
+const IdleTimeout = 30 * time.Minute
 
 var sessionManager *scs.SessionManager
 
