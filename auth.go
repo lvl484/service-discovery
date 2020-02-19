@@ -89,6 +89,17 @@ func loginHandler(users *Users) http.HandlerFunc {
 	})
 }
 
+func logoutHandler() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		err := sessionManager.Destroy(r.Context())
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	})
+}
+
 func joinHandler(users *Users) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var user User

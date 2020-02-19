@@ -87,16 +87,17 @@ func (d *Data) Update(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 	err := json.NewDecoder(r.Body).Decode(&c)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	compareConf := d.configs.get(params[muxVarsID])
 	res := (sessionManager.GetString(r.Context(), Username) == compareConf.Author)
 
 	if !res {
 		w.WriteHeader(http.StatusForbidden)
-		return
-	}
-
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
