@@ -31,7 +31,8 @@ func main() {
 
 	sessionManager = scs.New()
 	sessionManager.IdleTimeout = IdleTimeout
-	sessionManager.Cookie.Secure = true
+	//TODO: make connects via https
+	//sessionManager.Cookie.Secure = true
 	mainRouter := newRouter(data, users)
 
 	if err := http.ListenAndServe(
