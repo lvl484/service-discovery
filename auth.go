@@ -27,7 +27,6 @@ func Authorizer(e *casbin.Enforcer) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			role := sessionManager.GetString(r.Context(), UserRole)
-
 			if role == "" {
 				role = DefaultRole
 			}
@@ -110,7 +109,7 @@ func joinHandler(users *Users) http.HandlerFunc {
 			return
 		}
 
-		if len(name) == 0 && len(pass) == 0 {
+		if len(name) == 0 || len(pass) == 0 {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -127,13 +126,7 @@ func joinHandler(users *Users) http.HandlerFunc {
 		user.Password = encodedPass
 		user.Role = DefaultRegisterRole
 
-		_, err = users.db.Exec(
-			"INSERT INTO User(ID, Username, Password, Role) VALUES(?,?,?,?)",
-			&user.ID,
-			&user.Username,
-			&user.Password,
-			&user.Role,
-		)
+		err = users.Register(&user)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

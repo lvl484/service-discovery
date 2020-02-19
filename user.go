@@ -28,6 +28,21 @@ type Users struct {
 	db   *sql.DB
 }
 
+func (u *Users) Register(user *User) error {
+	_, err := u.db.Exec(
+		"INSERT INTO User(ID, Username, Password, Role) VALUES(?,?,?,?)",
+		&user.ID,
+		&user.Username,
+		&user.Password,
+		&user.Role,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (u *Users) Exists(id, pass string) (bool, error) {
 	var user User
 
