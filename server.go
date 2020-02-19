@@ -36,7 +36,7 @@ func main() {
 	mainRouter := newRouter(data, users)
 
 	if err := http.ListenAndServe(
-		*addr, sessionManager.LoadAndSave(Authorizer(authEnforce, users)(mainRouter)),
+		*addr, sessionManager.LoadAndSave(Authorizer(authEnforce)(mainRouter)),
 	); err != nil {
 		log.Fatal(err)
 	}

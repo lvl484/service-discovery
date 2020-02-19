@@ -23,24 +23,15 @@ const (
 )
 
 // Authorizer is a middleware for authorization
-func Authorizer(e *casbin.Enforcer, users *Users) func(next http.Handler) http.Handler {
+func Authorizer(e *casbin.Enforcer) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			role := sessionManager.GetString(r.Context(), UserRole)
+
 			if role == "" {
 				role = DefaultRole
-			} else if len(role) > 0 {
-				uid := sessionManager.GetString(r.Context(), UserID)
-				pass := sessionManager.GetString(r.Context(), Password)
-				exists, err := users.Exists(uid, pass)
-				if err != nil {
-					w.WriteHeader(http.StatusInternalServerError)
-					return
-				} else if !exists {
-					w.WriteHeader(http.StatusForbidden)
-					return
-				}
 			}
+
 			// casbin enforce
 			res, err := e.Enforce(role, r.URL.Path, r.Method)
 			if err != nil {
@@ -69,7 +60,8 @@ func loginHandler(users *Users) http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
-		} else if user == nil {
+		}
+		if user == nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(ErrWrongCredentials))
 			return
