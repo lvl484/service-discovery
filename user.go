@@ -76,6 +76,23 @@ func (u *Users) FindByCredentials(name, pass string) (*User, error) {
 	return &user, nil
 }
 
+func (u *Users) FindByUsername(name string) (*User, error) {
+	var user User
+
+	userRow := u.db.QueryRow("SELECT username FROM users WHERE username=$1", name)
+	err := userRow.Scan(&user.Username)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func newUsers() *Users {
 	connF := fmt.Sprintf(connFormat, os.Getenv(psqlUser), os.Getenv(psqlPass), os.Getenv(psqlDB))
 	database, err := sql.Open("postgres", connF)
