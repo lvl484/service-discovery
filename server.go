@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs"
+	"github.com/alexedwards/scs/postgresstore"
 	"github.com/casbin/casbin"
 )
 
@@ -31,6 +32,7 @@ func main() {
 
 	sessionManager = scs.New()
 	sessionManager.IdleTimeout = IdleTimeout
+	sessionManager.Store = postgresstore.New(users.db)
 	//TODO: make connects via https
 	//sessionManager.Cookie.Secure = true
 	mainRouter := newRouter(data, users)
