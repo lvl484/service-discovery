@@ -1,6 +1,6 @@
 p, owner, /*, (GET)|(POST)|(PUT)|(DELETE)
 p, admin, /*, (GET)|(POST)|(PUT)|(DELETE)
-p, user, /list*, (GET)|(POST)|(PUT)
+p, user, /list*, (GET)|(POST)|(PUT)|(DELETE)
 p, user, /logout, POST
 p, guest, /list*, GET
 p, guest, /login, POST

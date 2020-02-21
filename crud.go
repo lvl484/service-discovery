@@ -45,6 +45,7 @@ func NewData() *Data {
 // Add config
 func (d *Data) Add(w http.ResponseWriter, r *http.Request) {
 	var c config
+
 	err := json.NewDecoder(r.Body).Decode(&c)
 
 	if err != nil {
@@ -120,6 +121,21 @@ func (d *Data) Update(w http.ResponseWriter, r *http.Request) {
 // Delete config by ID
 func (d *Data) Delete(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
+
+	compareConf, err := d.configs.get(params[muxVarsID])
+
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	res := (sessionManager.GetString(r.Context(), Username) == compareConf.Author)
+
+	if !res {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	d.configs.delete(params[muxVarsID])
 	w.WriteHeader(http.StatusNoContent)
 }
