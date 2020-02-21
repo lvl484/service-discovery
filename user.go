@@ -49,29 +49,6 @@ func (u *Users) Register(user *User) error {
 	return nil
 }
 
-func (u *Users) Exists(id, pass string) (bool, error) {
-	var user User
-
-	passRow := u.db.QueryRow("SELECT Password FROM User WHERE ID=?", id)
-	err := passRow.Scan(&user.Password)
-
-	if err == sql.ErrNoRows {
-		return false, nil
-	}
-
-	if err != nil {
-		return false, err
-	}
-
-	res := encodepass.CompareEncodedPassword(pass, user.Password)
-
-	if !res {
-		return false, nil
-	}
-
-	return true, nil
-}
-
 func (u *Users) FindByCredentials(name, pass string) (*User, error) {
 	var user User
 
