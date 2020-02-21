@@ -98,7 +98,7 @@ func joinHandler(users *Users) http.HandlerFunc {
 
 		name := r.PostFormValue(Username)
 		pass := r.PostFormValue(Password)
-		res, err := users.FindByCredentials(name, pass)
+		res, err := users.FindByUsername(name)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
