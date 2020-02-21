@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"sync"
 	"time"
@@ -12,6 +13,8 @@ import (
 
 const (
 	muxVarsID = "ID"
+
+	ErrNotFound = "NOT_FOUND"
 )
 
 type config struct {
@@ -62,7 +65,7 @@ func (d *Data) Add(w http.ResponseWriter, r *http.Request) {
 // Get config by ID
 func (d *Data) Get(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	c := d.configs.get(params[muxVarsID])
+	c, _ := d.configs.get(params[muxVarsID])
 	err := json.NewEncoder(w).Encode(c)
 
 	if err != nil {
@@ -93,13 +96,22 @@ func (d *Data) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	compareConf := d.configs.get(params[muxVarsID])
+	compareConf, err := d.configs.get(params[muxVarsID])
+
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
 	res := (sessionManager.GetString(r.Context(), Username) == compareConf.Author)
 
 	if !res {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
+
+	c.Author = compareConf.Author
+	c.DateCreated = time.Now()
 
 	d.configs.set(params[muxVarsID], c)
 	w.WriteHeader(http.StatusNoContent)
@@ -132,11 +144,17 @@ func (c *configs) add(id string, conf config) {
 	c.all[id] = conf
 }
 
-func (c *configs) get(id string) config {
+func (c *configs) get(id string) (*config, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	return c.all[id]
+	conf, ok := c.all[id]
+
+	if !ok {
+		return nil, errors.New(ErrNotFound)
+	}
+
+	return &conf, nil
 }
 
 func (c *configs) getIDs() []string {
