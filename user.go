@@ -6,14 +6,17 @@ import (
 	"log"
 	"os"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
+
 	"github.com/lvl484/service-discovery/encodepass"
 )
 
 const (
-	MysqlUser = "MYSQL_USER"
-	MysqlPass = "MYSQL_PASS"
-	MysqlDB   = "MYSQL_DB"
+	psqlUser = "PSQL_USER"
+	psqlPass = "PSQL_PASS"
+	psqlDB   = "PSQL_DB"
+
+	connFormat = "host=localhost port=5432 user=%v password=%v dbname=%v sslmode=disable"
 )
 
 type User struct {
@@ -29,13 +32,16 @@ type Users struct {
 }
 
 func (u *Users) Register(user *User) error {
+	stmt := `
+		INSERT INTO users(ID, Username, Password, Role) VALUES($1,$2,$3,$4) `
 	_, err := u.db.Exec(
-		"INSERT INTO User(ID, Username, Password, Role) VALUES(?,?,?,?)",
+		stmt,
 		&user.ID,
 		&user.Username,
 		&user.Password,
 		&user.Role,
 	)
+
 	if err != nil {
 		return err
 	}
@@ -69,7 +75,7 @@ func (u *Users) Exists(id, pass string) (bool, error) {
 func (u *Users) FindByCredentials(name, pass string) (*User, error) {
 	var user User
 
-	userRow := u.db.QueryRow("SELECT * FROM User WHERE Username=?", name)
+	userRow := u.db.QueryRow("SELECT * FROM users WHERE username=$1", name)
 	err := userRow.Scan(&user.ID, &user.Username, &user.Password, &user.Role)
 
 	if err == sql.ErrNoRows {
@@ -94,8 +100,14 @@ func (u *Users) FindByCredentials(name, pass string) (*User, error) {
 }
 
 func newUsers() *Users {
-	s := fmt.Sprintf("%v:%v@/%v", os.Getenv(MysqlUser), os.Getenv(MysqlPass), os.Getenv(MysqlDB))
-	database, err := sql.Open("mysql", s)
+	connF := fmt.Sprintf(connFormat, os.Getenv(psqlUser), os.Getenv(psqlPass), os.Getenv(psqlDB))
+	database, err := sql.Open("postgres", connF)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = database.Ping()
 
 	if err != nil {
 		log.Println(err)

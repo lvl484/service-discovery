@@ -109,7 +109,6 @@ func joinHandler(users *Users) http.HandlerFunc {
 			w.Write([]byte(ErrUserExists))
 			return
 		}
-
 		if len(name) == 0 || len(pass) == 0 {
 			w.WriteHeader(http.StatusBadRequest)
 			return
