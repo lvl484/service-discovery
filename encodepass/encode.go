@@ -30,7 +30,7 @@ func EncodePassword(c *PasswordConfig, pass string) (string, error) {
 	b64Salt := base64.RawStdEncoding.EncodeToString(salt)
 	b64Hash := base64.RawStdEncoding.EncodeToString(hash)
 
-	format := "$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s$"
+	format := "$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s"
 	full := fmt.Sprintf(format, argon2.Version, c.memory, c.time, c.threads, b64Salt, b64Hash)
 
 	return full, nil
