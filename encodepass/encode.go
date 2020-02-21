@@ -64,11 +64,6 @@ func ComparePassword(password, hash string) (bool, error) {
 	return (subtle.ConstantTimeCompare(decodedHash, comparisonHash) == 1), nil
 }
 
-// CompareEncodePassword returns true if password matches
-func CompareEncodedPassword(pass1, pass2 string) bool {
-	return (pass1 == pass2)
-}
-
 type PasswordConfig struct {
 	time    uint32
 	memory  uint32
