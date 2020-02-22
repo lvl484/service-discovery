@@ -60,6 +60,10 @@ func (s *Services) SearchDead(interval time.Duration) {
 			s.mu.RLock()
 
 			for name, service := range s.ServiceMap {
+				if !service.Alive {
+					continue
+				}
+
 				if !service.CheckDead() {
 					service.Alive = false
 					s.ServiceMap[name] = service
