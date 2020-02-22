@@ -30,7 +30,9 @@ func main() {
 
 	userStorage := newUserStorage(storage.DB)
 	data := NewData()
+
 	services := servicetrace.NewServices()
+	go services.SearchDead(servicetrace.ConnIdleTimeout)
 
 	authEnforce, err := casbin.NewEnforcer("./auth.conf", "policy.csv")
 

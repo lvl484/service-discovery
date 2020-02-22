@@ -30,6 +30,5 @@ func (d *Data) GetForService(s *servicetrace.Services) http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
 	})
 }
