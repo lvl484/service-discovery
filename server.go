@@ -11,7 +11,7 @@ import (
 	"github.com/casbin/casbin"
 )
 
-const IdleTimeout = 30 * time.Minute
+const SessionIdleTimeout = 30 * time.Minute
 
 var sessionManager *scs.SessionManager
 
@@ -31,7 +31,7 @@ func main() {
 	}
 
 	sessionManager = scs.New()
-	sessionManager.IdleTimeout = IdleTimeout
+	sessionManager.IdleTimeout = SessionIdleTimeout
 	sessionManager.Store = postgresstore.New(users.db)
 	//TODO: make connects via https
 	//sessionManager.Cookie.Secure = true
