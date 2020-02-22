@@ -35,7 +35,10 @@ func (s *Services) UpSet(name string, service Service) {
 }
 
 func (s *Services) SetDeadLine(name string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	service, ok := s.ServiceMap[name]
+
 	if !ok {
 		return errors.New(ErrNotFound)
 	}
