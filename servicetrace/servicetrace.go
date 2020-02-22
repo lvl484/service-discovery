@@ -57,11 +57,16 @@ func (s *Services) SearchDead(interval time.Duration) {
 	for {
 		select {
 		case <-ticker.C:
-			for _, s := range s.ServiceMap {
-				if !s.CheckDead() {
-					s.Alive = false
+			s.mu.RLock()
+
+			for name, service := range s.ServiceMap {
+				if !service.CheckDead() {
+					service.Alive = false
+					s.ServiceMap[name] = service
 				}
 			}
+
+			s.mu.RUnlock()
 		}
 	}
 }
