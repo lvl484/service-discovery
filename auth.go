@@ -51,7 +51,7 @@ func Authorizer(e *casbin.Enforcer) func(next http.Handler) http.Handler {
 	}
 }
 
-func loginHandler(users *Users) http.HandlerFunc {
+func loginHandler(users *UserStorage) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		name := r.PostFormValue(Username)
 		pass := r.PostFormValue(Password)
@@ -92,7 +92,7 @@ func logoutHandler() http.HandlerFunc {
 	})
 }
 
-func joinHandler(users *Users) http.HandlerFunc {
+func joinHandler(users *UserStorage) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var user User
 

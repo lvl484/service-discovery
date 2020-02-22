@@ -9,6 +9,7 @@ import (
 	"github.com/alexedwards/scs"
 	"github.com/alexedwards/scs/postgresstore"
 	"github.com/casbin/casbin"
+	"github.com/lvl484/service-discovery/storage"
 )
 
 const SessionIdleTimeout = 30 * time.Minute
@@ -19,8 +20,13 @@ func main() {
 	addr := flag.String("a", ":8080", "port")
 	flag.Parse()
 
-	users := newUsers()
-	defer users.db.Close()
+	storage, err := storage.NewStorage()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer storage.DB.Close()
+
+	userStorage := newUserStorage(storage.DB)
 
 	data := NewData()
 
@@ -32,10 +38,10 @@ func main() {
 
 	sessionManager = scs.New()
 	sessionManager.IdleTimeout = SessionIdleTimeout
-	sessionManager.Store = postgresstore.New(users.db)
+	sessionManager.Store = postgresstore.New(storage.DB)
 	//TODO: make connects via https
 	//sessionManager.Cookie.Secure = true
-	mainRouter := newRouter(data, users)
+	mainRouter := newRouter(data, userStorage)
 
 	if err := http.ListenAndServe(
 		*addr, sessionManager.LoadAndSave(Authorizer(authEnforce)(mainRouter)),

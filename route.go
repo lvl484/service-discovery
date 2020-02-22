@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func newRouter(data *Data, users *Users) *mux.Router {
+func newRouter(data *Data, users *UserStorage) *mux.Router {
 	mainRouter := mux.NewRouter()
 	mainRouter.HandleFunc("/list", data.Add).Methods(http.MethodPost)
 	mainRouter.HandleFunc("/list", data.GetIDs).Methods(http.MethodGet)

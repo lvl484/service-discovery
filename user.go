@@ -2,21 +2,10 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
-	"log"
-	"os"
 
 	_ "github.com/lib/pq"
 
 	"github.com/lvl484/service-discovery/encodepass"
-)
-
-const (
-	psqlUser = "PSQL_USER"
-	psqlPass = "PSQL_PASS"
-	psqlDB   = "PSQL_DB"
-
-	connFormat = "host=localhost port=5432 user=%v password=%v dbname=%v sslmode=disable"
 )
 
 type User struct {
@@ -26,12 +15,12 @@ type User struct {
 	Role     string
 }
 
-type Users struct {
+type UserStorage struct {
 	conf *encodepass.PasswordConfig
 	db   *sql.DB
 }
 
-func (u *Users) Register(user *User) error {
+func (u *UserStorage) Register(user *User) error {
 	stmt := `
 		INSERT INTO users(ID, Username, Password, Role) VALUES($1,$2,$3,$4) `
 	_, err := u.db.Exec(
@@ -49,7 +38,7 @@ func (u *Users) Register(user *User) error {
 	return nil
 }
 
-func (u *Users) FindByCredentials(name, pass string) (*User, error) {
+func (u *UserStorage) FindByCredentials(name, pass string) (*User, error) {
 	var user User
 
 	userRow := u.db.QueryRow("SELECT * FROM users WHERE username=$1", name)
@@ -76,7 +65,7 @@ func (u *Users) FindByCredentials(name, pass string) (*User, error) {
 	return &user, nil
 }
 
-func (u *Users) FindByUsername(name string) (*User, error) {
+func (u *UserStorage) FindByUsername(name string) (*User, error) {
 	var user User
 
 	userRow := u.db.QueryRow("SELECT username FROM users WHERE username=$1", name)
@@ -93,24 +82,11 @@ func (u *Users) FindByUsername(name string) (*User, error) {
 	return &user, nil
 }
 
-func newUsers() *Users {
-	connF := fmt.Sprintf(connFormat, os.Getenv(psqlUser), os.Getenv(psqlPass), os.Getenv(psqlDB))
-	database, err := sql.Open("postgres", connF)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = database.Ping()
-
-	if err != nil {
-		log.Println(err)
-	}
-
+func newUserStorage(db *sql.DB) *UserStorage {
 	conf := encodepass.NewPasswordConfig()
 
-	return &Users{
-		db:   database,
+	return &UserStorage{
+		db:   db,
 		conf: conf,
 	}
 }
