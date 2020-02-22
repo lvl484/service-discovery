@@ -35,7 +35,7 @@ func main() {
 	data := NewData()
 
 	services := servicetrace.NewServices()
-	go services.SearchDead(servicetrace.ConnIdleTimeout)
+	go services.SearchDead(ServiceIdleTimeout)
 
 	authEnforce, err := casbin.NewEnforcer("./auth.conf", "policy.csv")
 
