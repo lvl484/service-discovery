@@ -104,7 +104,7 @@ func joinHandler(users *UserStorage) http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		if res != nil {
+		if res {
 			w.WriteHeader(http.StatusForbidden)
 			w.Write([]byte(ErrUserExists))
 			return

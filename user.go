@@ -65,21 +65,21 @@ func (u *UserStorage) FindByCredentials(name, pass string) (*User, error) {
 	return &user, nil
 }
 
-func (u *UserStorage) FindByUsername(name string) (*User, error) {
-	var user User
+func (u *UserStorage) FindByUsername(name string) (bool, error) {
+	var username string
 
 	userRow := u.db.QueryRow("SELECT username FROM users WHERE username=$1", name)
-	err := userRow.Scan(&user.Username)
+	err := userRow.Scan(&username)
 
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return false, nil
 	}
 
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	return &user, nil
+	return true, nil
 }
 
 func newUserStorage(db *sql.DB) *UserStorage {
