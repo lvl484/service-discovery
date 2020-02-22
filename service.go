@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -29,6 +30,18 @@ func (d *Data) GetForService(s *servicetrace.Services) http.HandlerFunc {
 		if err := s.SetDeadLine(serviceName); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
+		}
+	})
+}
+
+func GetListOfServices(s servicetrace.Services) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		for name, service := range s.ServiceMap {
+			serviceFormat := fmt.Sprintf("Name: %v, Alive: %v", name, service.Alive)
+			err := json.NewEncoder(w).Encode(serviceFormat)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 		}
 	})
 }
