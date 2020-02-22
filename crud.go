@@ -11,6 +11,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// TODO: save configs to postgres
+
 const (
 	muxVarsID = "ID"
 
