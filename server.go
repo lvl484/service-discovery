@@ -9,6 +9,8 @@ import (
 	"github.com/alexedwards/scs"
 	"github.com/alexedwards/scs/postgresstore"
 	"github.com/casbin/casbin"
+
+	"github.com/lvl484/service-discovery/servicetrace"
 	"github.com/lvl484/service-discovery/storage"
 )
 
@@ -27,8 +29,8 @@ func main() {
 	defer storage.DB.Close()
 
 	userStorage := newUserStorage(storage.DB)
-
 	data := NewData()
+	services := servicetrace.NewServices()
 
 	authEnforce, err := casbin.NewEnforcer("./auth.conf", "policy.csv")
 
@@ -41,7 +43,7 @@ func main() {
 	sessionManager.Store = postgresstore.New(storage.DB)
 	//TODO: make connects via https
 	//sessionManager.Cookie.Secure = true
-	mainRouter := newRouter(data, userStorage)
+	mainRouter := newRouter(data, userStorage, services)
 
 	if err := http.ListenAndServe(
 		*addr, sessionManager.LoadAndSave(Authorizer(authEnforce)(mainRouter)),

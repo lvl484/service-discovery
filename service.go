@@ -1,0 +1,35 @@
+package main
+
+import (
+	"encoding/json"
+	"log"
+	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/lvl484/service-discovery/servicetrace"
+)
+
+func (d *Data) GetForService(s *servicetrace.Services) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		log.Println(params[servicetrace.ServiceName])
+		c, _ := d.configs.get(params[muxVarsID])
+		err := json.NewEncoder(w).Encode(c)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		serviceName := params[servicetrace.ServiceName]
+
+		var service servicetrace.Service
+
+		s.UpSet(serviceName, service)
+		if err := s.SetDeadLine(serviceName); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+	})
+}
