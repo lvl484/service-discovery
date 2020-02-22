@@ -14,7 +14,10 @@ import (
 	"github.com/lvl484/service-discovery/storage"
 )
 
-const SessionIdleTimeout = 30 * time.Minute
+const (
+	SessionIdleTimeout = 30 * time.Minute
+	ServiceIdleTimeout = 5 * time.Minute
+)
 
 var sessionManager *scs.SessionManager
 
