@@ -51,28 +51,21 @@ func (s *Services) SetDeadLine(name string) error {
 	return nil
 }
 
-func (s *Services) SearchDead(interval time.Duration) {
-	ticker := time.NewTicker(interval)
+func (s *Services) SearchDead() {
+	s.Mu.Lock()
 
-	for {
-		select {
-		case <-ticker.C:
-			s.Mu.Lock()
+	for name, service := range s.ServiceMap {
+		if !service.Alive {
+			continue
+		}
 
-			for name, service := range s.ServiceMap {
-				if !service.Alive {
-					continue
-				}
-
-				if !service.CheckDead() {
-					service.Alive = false
-					s.ServiceMap[name] = service
-				}
-			}
-
-			s.Mu.Unlock()
+		if !service.CheckDead() {
+			service.Alive = false
+			s.ServiceMap[name] = service
 		}
 	}
+
+	s.Mu.Unlock()
 }
 
 func NewServices() *Services {
