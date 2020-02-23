@@ -2,7 +2,6 @@ package servicetrace
 
 import (
 	"errors"
-	"log"
 	"sync"
 	"time"
 )
@@ -61,7 +60,6 @@ func (s *Services) SearchDead(interval time.Duration) {
 			s.Mu.Lock()
 
 			for name, service := range s.ServiceMap {
-				log.Println(1)
 				if !service.Alive {
 					continue
 				}
