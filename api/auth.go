@@ -67,6 +67,18 @@ func loginHandler(users *UserStorage) http.HandlerFunc {
 			return
 		}
 
+		res, err := encodepass.ComparePassword(pass, user.Password)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		if !res {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+
 		// setup session
 		if err := sessionManager.RenewToken(r.Context()); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

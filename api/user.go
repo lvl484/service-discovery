@@ -52,16 +52,6 @@ func (u *UserStorage) FindByCredentials(name, pass string) (*User, error) {
 		return nil, err
 	}
 
-	res, err := encodepass.ComparePassword(pass, user.Password)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if !res {
-		return nil, nil
-	}
-
 	return &user, nil
 }
 
