@@ -32,7 +32,7 @@ func (d *Data) GetForService(s *servicetrace.Services) http.HandlerFunc {
 	})
 }
 
-func GetListOfServices(s servicetrace.Services) http.HandlerFunc {
+func GetListOfServices(s *servicetrace.Services) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		for name, service := range s.ServiceMap {
 			serviceFormat := fmt.Sprintf("Name: %v, Alive: %v", name, service.Alive)
