@@ -25,7 +25,7 @@ type Services struct {
 }
 
 func (s *Service) CheckDead() bool {
-	return s.DeadLine.Before(time.Now())
+	return s.DeadLine.After(time.Now())
 }
 
 func (s *Services) UpSet(name string, service Service) {
