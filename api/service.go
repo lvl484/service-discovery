@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -13,7 +12,6 @@ import (
 func (d *Data) GetForService(s *servicetrace.Services) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
-		log.Println(params[servicetrace.ServiceName])
 		c, _ := d.configs.get(params[muxVarsID])
 		err := json.NewEncoder(w).Encode(c)
 
