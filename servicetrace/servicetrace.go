@@ -2,6 +2,7 @@ package servicetrace
 
 import (
 	"errors"
+	"log"
 	"sync"
 	"time"
 )
@@ -20,7 +21,7 @@ type Service struct {
 }
 
 type Services struct {
-	mu         *sync.RWMutex
+	Mu         *sync.RWMutex
 	ServiceMap map[string]Service
 }
 
@@ -29,14 +30,14 @@ func (s *Service) CheckDead() bool {
 }
 
 func (s *Services) UpSet(name string, service Service) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.Mu.Lock()
+	defer s.Mu.Unlock()
 	s.ServiceMap[name] = service
 }
 
 func (s *Services) SetDeadLine(name string) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.Mu.Lock()
+	defer s.Mu.Unlock()
 	service, ok := s.ServiceMap[name]
 
 	if !ok {
@@ -57,9 +58,10 @@ func (s *Services) SearchDead(interval time.Duration) {
 	for {
 		select {
 		case <-ticker.C:
-			s.mu.Lock()
+			s.Mu.Lock()
 
 			for name, service := range s.ServiceMap {
+				log.Println(1)
 				if !service.Alive {
 					continue
 				}
@@ -70,7 +72,7 @@ func (s *Services) SearchDead(interval time.Duration) {
 				}
 			}
 
-			s.mu.Unlock()
+			s.Mu.Unlock()
 		}
 	}
 }
@@ -78,6 +80,6 @@ func (s *Services) SearchDead(interval time.Duration) {
 func NewServices() *Services {
 	return &Services{
 		ServiceMap: make(map[string]Service),
-		mu:         new(sync.RWMutex),
+		Mu:         new(sync.RWMutex),
 	}
 }
