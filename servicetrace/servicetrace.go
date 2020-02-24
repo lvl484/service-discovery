@@ -21,7 +21,7 @@ type Service struct {
 }
 
 type Services struct {
-	Mu         *sync.RWMutex
+	mu         *sync.RWMutex
 	ServiceMap map[string]Service
 }
 
@@ -30,8 +30,8 @@ func (s *Service) CheckDead() bool {
 }
 
 func (s *Services) GetListOfServices() []string {
-	s.Mu.RLock()
-	defer s.Mu.RUnlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	services := make([]string, 0, len(s.ServiceMap))
 
 	for name, service := range s.ServiceMap {
@@ -43,14 +43,14 @@ func (s *Services) GetListOfServices() []string {
 }
 
 func (s *Services) UpSet(name string, service Service) {
-	s.Mu.Lock()
-	defer s.Mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.ServiceMap[name] = service
 }
 
 func (s *Services) SetDeadLine(name string) error {
-	s.Mu.Lock()
-	defer s.Mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	service, ok := s.ServiceMap[name]
 
 	if !ok {
@@ -66,25 +66,20 @@ func (s *Services) SetDeadLine(name string) error {
 }
 
 func (s *Services) SearchDead() {
-	s.Mu.Lock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	for name, service := range s.ServiceMap {
-		if !service.Alive {
-			continue
-		}
-
 		if !service.CheckDead() {
 			service.Alive = false
 			s.ServiceMap[name] = service
 		}
 	}
-
-	s.Mu.Unlock()
 }
 
 func NewServices() *Services {
 	return &Services{
 		ServiceMap: make(map[string]Service),
-		Mu:         new(sync.RWMutex),
+		mu:         new(sync.RWMutex),
 	}
 }
