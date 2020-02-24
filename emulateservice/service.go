@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"sync"
 	"time"
@@ -26,45 +28,60 @@ type config struct {
 }
 
 func main() {
-	configID := flag.String("i", "SomeID", "id to get config")
 	emulatorNum := flag.Int("n", 1, "nubmer of services")
 	flag.Parse()
 
 	wg := &sync.WaitGroup{}
-	Emulate(*configID, *emulatorNum, wg)
+	if err := Emulate(*emulatorNum, wg); err != nil {
+		log.Println(err)
+	}
 	wg.Wait()
 }
 
-func GetConfigs() []string {
+func GetConfigs() ([]string, error) {
 	var idList []string
 
 	resp, err := http.Get(DefaultURL)
 
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(&idList)
 
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 
-	return idList
+	return idList, nil
 }
 
-func Emulate(configID string, num int, wg *sync.WaitGroup) {
+func Emulate(num int, wg *sync.WaitGroup) error {
+	s, err := GetConfigs()
+
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	if len(s) < 1 {
+		return errors.New("EMPTY_SLICE")
+	}
+
 	for i := 0; i < num; i++ {
 		wg.Add(1)
 
+		configID := s[rand.Intn(len(s))]
 		serviceName := faker.Lorem().Word()
 		fullURL := fmt.Sprintf("%v/%v/%v", DefaultURL, configID, serviceName)
 		log.Println(fullURL)
 
 		go emulate(fullURL, wg)
 	}
+
+	return nil
 }
 
 func emulate(configURL string, wg *sync.WaitGroup) {
