@@ -2,6 +2,7 @@ package servicetrace
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -26,6 +27,19 @@ type Services struct {
 
 func (s *Service) CheckDead() bool {
 	return s.DeadLine.After(time.Now())
+}
+
+func (s *Services) GetListOfServices() []string {
+	s.Mu.RLock()
+	defer s.Mu.RUnlock()
+	services := make([]string, 0, len(s.ServiceMap))
+
+	for name, service := range s.ServiceMap {
+		serviceFormat := fmt.Sprintf("Name: %v, Alive: %v, Deadline: %v", name, service.Alive, service.DeadLine)
+		services = append(services, serviceFormat)
+	}
+
+	return services
 }
 
 func (s *Services) UpSet(name string, service Service) {
