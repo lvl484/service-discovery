@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -35,11 +34,9 @@ func (d *Data) GetForService(s *servicetrace.Services) http.HandlerFunc {
 func GetListOfServices(s *servicetrace.Services) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s.SearchDead()
-		s.Mu.RLock()
-		defer s.Mu.RUnlock()
-		for name, service := range s.ServiceMap {
-			serviceFormat := fmt.Sprintf("Name: %v, Alive: %v", name, service.Alive)
-			err := json.NewEncoder(w).Encode(serviceFormat)
+		list := s.GetListOfServices()
+		for _, service := range list {
+			err := json.NewEncoder(w).Encode(service)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 			}
