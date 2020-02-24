@@ -35,6 +35,26 @@ func main() {
 	wg.Wait()
 }
 
+func GetConfigs() []string {
+	var idList []string
+
+	resp, err := http.Get(DefaultURL)
+
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&idList)
+
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
+	return idList
+}
+
 func Emulate(configID string, num int, wg *sync.WaitGroup) {
 	for i := 0; i < num; i++ {
 		wg.Add(1)
